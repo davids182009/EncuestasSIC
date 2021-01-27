@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.login-form,
+.login-form h1,
+.login-form span,
+.login-form input,
+.login-form label {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+}
+
+.login-form {
+    position: relative;
+    width: 200px;
+    height: 250px;
+    padding: 15px 25px 0 25px;
+    margin-top: 15px;
+    cursor: default;
+ 
+    background-color: #141517; 
+}
+
+.login-form:before {
+    position: absolute;
+    top: -12px;
+    left: 10px;
+ 
+}
+
+.login-form h1 {
+    line-height: 40px;
+    font-family: 'Myriad Pro', sans-serif;
+    font-size: 22px;
+    font-weight: normal;
+    color: #e4e4e4;
+}
+
+.login-form input[type=text],
+.login-form input[type=password],
+.login-form input[type=submit] {
+    line-height: 14px;
+    margin: 10px 0;
+    padding: 6px 15px;
+    border: 0;
+    outline: none;
+ 
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-shadow: 0px 1px 1px rgba(255,255,255, .2);
+ 
+    -webkit-border-radius: 26px;
+    -moz-border-radius: 26px;
+    border-radius: 26px;
+ 
+    -webkit-transition: all .15s ease-in-out;
+    -moz-transition: all .15s ease-in-out;
+    -o-transition: all .15s ease-in-out;
+    transition: all .15s ease-in-out;
+}
+
+.login-form input[type=text],
+.login-form input[type=password],
+.js .login-form span {
+    color: #686868;
+    width: 170px;
+ 
+    -webkit-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6);
+    -moz-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6);
+    box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6);
+ 
+    background: #989898;
+    background: -moz-linear-gradient(top,  #ffffff 0%, #989898 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#989898));
+    background: -webkit-linear-gradient(top,  #ffffff 0%,#989898 100%);
+    background: -o-linear-gradient(top,  #ffffff 0%,#989898 100%);
+    background: -ms-linear-gradient(top,  #ffffff 0%,#989898 100%);
+    background: linear-gradient(top,  #ffffff 0%,#989898 100%);
+}
+
+.login-form input[type=text]:hover,
+.login-form input[type=password]:hover {
+    -webkit-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6), 0px 0px 5px rgba(255,255,255, .5);
+    -moz-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6), 0px 0px 5px rgba(255,255,255, .5);
+    box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .6), 0px 0px 5px rgba(255,255,255, .5);
+}
+
+.login-form input[type=text]:focus,
+.login-form input[type=password]:focus {
+    background: #e1e1e1;
+    background: -moz-linear-gradient(top,  #ffffff 0%, #e1e1e1 100%);
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffffff), color-stop(100%,#e1e1e1));
+    background: -webkit-linear-gradient(top,  #ffffff 0%,#e1e1e1 100%);
+    background: -o-linear-gradient(top,  #ffffff 0%,#e1e1e1 100%);
+    background: -ms-linear-gradient(top,  #ffffff 0%,#e1e1e1 100%);
+    background: linear-gradient(top,  #ffffff 0%,#e1e1e1 100%);
+}
+
+.login-form input[type=submit] {
+    float: right;
+    cursor: pointer;
+ 
+    color: #445b0f;
+ 
+    -webkit-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .45), 0px 1px 1px 0px rgba(0,0,0, .3);
+    -moz-box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .45), 0px 1px 1px 0px rgba(0,0,0, .3);
+    box-shadow: inset 1px 1px 1px 0px rgba(255,255,255, .45), 0px 1px 1px 0px rgba(0,0,0, .3);
+}
+
+.sidepanel  {
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  height: 250px;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidepanel a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidepanel a:hover {
+  color: #f1f1f1;
+}
+
+.sidepanel .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+}
+
+.openbtn {
+  font-size: 20px;
+  cursor: pointer;
+  background-color: #111;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+}
+
+.openbtn:hover {
+  background-color:#444;
+}
+.panelsuperior {
+	/*height: 50vh;*/
+	width: 100%;
+	/*background-color: orange;*/
+}
+
+#panelLateral {
+	/*height: 50vh;*/
+	width: 100%;
+	/*background-color: blue;*/
+}
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="http://lig-membres.imag.fr/donsez/cours/exemplescourstechnoweb/js_securehash/md5.js"></script>
+</head>
+
+<body>
+
+<div id="panelLogin" class="panelsuperior">    
+    <form id="formLogin" class="login-form">
+        <input type="text" id="user" name="username" placeholder="usuario" required>
+		<input type="password" id="pass" name="password" placeholder="password" required>
+		<input type="submit" id="login" value="Entrar">
+	</form>
+</div>
+<div id="panelLateral">
+	<div id="mySidepanel" class="sidepanel">
+		  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+		  <a href="./formDiligenciar.html">Diligenciar Encuesta</a>
+		  <a href="./consultarRespuestas.html">Ver Respuestas</a>
+		  </br>
+		  <a href="#" onclick="cerrarSesion()">Cerrar Sesion</a>
+  
+	</div>
+	<button class="openbtn" onclick="openNav()">☰ Opciones</button> 
+	
+</div>
+
+
+
+<script>
+var contexto =this;
+var idUsuario = 0;
+
+function openNav() {
+  document.getElementById("mySidepanel").style.width = "500px";
+}
+
+function closeNav() {
+  document.getElementById("mySidepanel").style.width = "0";
+}
+
+function cerrarSesion(){
+	localStorage.clear();
+	$('#panelLogin').show();
+	$('#panelLateral').hide();
+}
+
+$( "#formLogin" ).submit(function(event) {
+
+	event.preventDefault();
+	
+	if ($('#user').val() != '' && $('#pass').val() != ''){
+		var usuario = $('#user').val();
+		var pass = $('#pass').val();
+		var objeto = new Object();
+		objeto.usuario = usuario;
+		objeto.contrasena = calcMD5(pass);
+						
+		var json = JSON.stringify(objeto);
+		console.log(json);	
+		
+		$.ajax({
+			type: "POST",
+			contentType: "application/json",
+			url: "http://localhost:8080/SicServices-0.0.1-SNAPSHOT/SicWS/SecurityService/getToken",
+			data: json,
+			dataType: 'json',
+			timeout: 600000,
+			success: function (data) {
+				localStorage.setItem("sesion", JSON.stringify(data));
+				console.log("DONE");
+				console.log(data.id_usuario);
+				$('#panelLogin').hide(300, function(){
+					$('#panelLateral').show(300);
+				});
+			},
+			error: function (e) {
+				console.log("ERROR: ", e);
+				alert(e.responseText);
+			}
+		});
+	}else{
+		alert("Debe digitar usuario y contraseña");
+	}
+});
+
+$( document ).ready(function() {
+		
+	var sesion = localStorage.getItem("sesion");
+	if(sesion){
+		$('#panelLogin').hide();
+	} else {
+		$('#panelLateral').hide();
+	}
+		
+});
+
+</script>
+
+</body>
+</html>

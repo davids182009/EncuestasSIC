@@ -1,0 +1,7 @@
+co\gov\sic\service\data\business\ImpInterfaceDataService.class
+co\gov\sic\service\data\interfaces\InterfaceDataService.class
+co\gov\sic\service\security\ws\SecurityService.class
+co\gov\sic\service\ws\App.class
+co\gov\sic\service\security\interfaces\InterfaceSecService.class
+co\gov\sic\service\security\business\ImpInterfaceSecService.class
+co\gov\sic\service\data\ws\DataService.class

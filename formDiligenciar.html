@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+	<form id="formEncuesta">
+		<table style="width:100%">
+		  <tr>
+			<td><label for="n_documento">Número Documento:</label></td>
+			<td><input type="number" id="n_documento" name="n_doc" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);" maxlength="10" required><br><br></td>
+		  </tr>
+		  <tr>
+			<td><label for="email">Email:</label></td>
+			<td><input type="email" id="email" name="ema" required><br><br></td>
+		  </tr>
+		  <tr>
+			<td><label for="comentarios">Comentarios:</label></td>
+			<td><textarea id="comentarios" name="comment" rows="5" cols="20" required></textarea><br><br></td>
+		  </tr>
+		  <tr>
+			<td><label for="ddlMarcas">Marca Favorita PC:</label></td>
+			<td><select id="ddlMarcas" required></select><br><br></td>
+		  </tr>
+		  <tr>
+			<td colspan="2"><button type="submit" id="guardar">Guardar</button></td>
+		  </tr>
+		</table>
+	</form>
+
+<script>
+	$( document ).ready(function() {
+	
+		var sesion = localStorage.getItem("sesion");
+		if(sesion){
+			
+			$('#panelLogin').hide();
+			
+			var resultado = $.ajax({
+			url : "http://localhost:8080/SicServices-0.0.1-SNAPSHOT/SicWS/DataService/consultarMarcasPC",
+			type: "GET",
+			success: function(data){
+				console.log(data);
+				console.log("PARSEO");
+				console.log(JSON.parse(data));
+				var ddlMarcas = $("#ddlMarcas");
+				$(JSON.parse(data)).each(function () {
+					var option = $("<option />");
+					option.html(this.marca);
+					option.val(this.id);
+					ddlMarcas.append(option);     
+				});
+			}
+		});
+			
+		} else {
+			window.location.replace("./index.html");
+			$('#panelLateral').hide();
+		}
+	});
+	
+	$( "#formEncuesta" ).submit(function(event) {
+	
+		event.preventDefault();
+		var numeroDoc = $('#n_documento').val();
+		var email = $('#email').val();
+		var comentario = $('#comentarios').val();
+		var marcaPc = $('#ddlMarcas').val();
+		var sesion = JSON.parse(localStorage.getItem("sesion"));	
+		
+		var objetoEncuesta = new Object();
+		objetoEncuesta.numeroDoc = numeroDoc;
+		objetoEncuesta.email = email;
+		objetoEncuesta.comentario = comentario;
+		objetoEncuesta.marcaPc = marcaPc;
+		objetoEncuesta.idUsuario = sesion.id_usuario;
+						
+		var jsonEncuesta = JSON.stringify(objetoEncuesta);
+		console.log(jsonEncuesta);
+				
+		$.ajax({
+			 type: "PUT",
+			 contentType: "application/json",
+			 url: "http://localhost:8080/SicServices-0.0.1-SNAPSHOT/SicWS/DataService/insertarDataDB",
+			 data: jsonEncuesta,
+			 dataType: 'json',
+			 timeout: 600000,
+			 success: function (data) {
+				 console.log("DONE");
+				 console.log(data);
+				 alert(data.exito);
+				 setTimeout(function(){ location.reload(); }, 500);
+			 },
+			 error: function (e) {
+				 console.log("ERROR: ", e);
+				 alert(e.responseText);
+			 }
+		});
+	
+	});
+
+</script>
+
+</body>
+</html>

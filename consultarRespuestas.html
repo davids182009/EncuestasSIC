@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+<div id="tablaEncuestas">
+	<table id="records_table" border='1'>
+		<tr>
+			<th>ID</th>
+			<th>N. Documento</th>
+			<th>Email</th>
+			<th>Comentarios</th>
+			<th>Marca PC</th>
+			<th>Fecha Diligenciamiento</th>
+			<th></th>
+		</tr>
+	</table>
+</div>
+
+<script>
+	$( document ).ready(function() {
+		
+		var sesion = localStorage.getItem("sesion");
+		if(sesion){
+			var objetoSesion = JSON.parse(localStorage.getItem("sesion"));
+			var objetoUsuario = new Object();
+			objetoUsuario.idUsuario = objetoSesion.id_usuario;
+							
+			var jsonUsuario = JSON.stringify(objetoUsuario);
+			console.log(jsonUsuario);
+			
+			$.ajax({
+				 type: "POST",
+				 contentType: "application/json",
+				 url: "http://localhost:8080/SicServices-0.0.1-SNAPSHOT/SicWS/DataService/consultarEncuestas",
+				 data: jsonUsuario,
+				 dataType: 'json',
+				 timeout: 600000,
+				 success: function (data) {
+					console.log("DONE");
+					console.log(data);
+					console.log(data.length);
+					
+					if(data.length > 0){
+						var trHTML = '';
+						$.each(data, function (i, item) {
+							trHTML += '<tr><td>' + item.id_encuesta + '</td><td>' + item.n_documento + '</td><td>' + item.email + '</td><td>' + item.comentario + '</td><td>' + item.marca_pc + '</td><td>' + item.fecha + '</td><td>' + '<a href="#Foo" onclick="eliminar(' + item.id_encuesta + ');">Eliminar</a>' + '</td></tr>';
+						});
+						$('#records_table').append(trHTML);
+					} else{
+						alert("No existen encuestas diligenciadas para este usuario, aqui aparecen las encuestas culminadas")
+					}
+				 },
+				 error: function (e) {
+					 console.log("ERROR: ", e);
+					 alert("No existen encuestas diligenciadas para este usuario, aqui aparecen las encuestas culminadas");
+					 window.location.replace("./index.html");
+				 }
+			});	
+		} else {
+			window.location.replace("./index.html");
+			$('#panelLateral').hide();
+		}
+	});
+	
+	function eliminar(id){
+	
+		var objetoEncuesta = new Object();
+		objetoEncuesta.idEncuesta = id;
+						
+		var jsonEncuesta = JSON.stringify(objetoEncuesta);
+		console.log(jsonEncuesta);
+		
+		$.ajax({
+			 type: "DELETE",
+			 contentType: "application/json",
+			 url: "http://localhost:8080/SicServices-0.0.1-SNAPSHOT/SicWS/DataService/eliminarEncuestas",
+			 data: jsonEncuesta,
+			 dataType: 'json',
+			 timeout: 600000,
+			 success: function (data) {
+				console.log("DONE");
+				console.log(data);
+				alert(data.exito);
+				setTimeout(function(){ location.reload(); }, 500);
+			 },
+			 error: function (e) {
+				 console.log("ERROR: ", e);
+			 }
+		});
+	}
+</script>
+
+</body>
+</html>
