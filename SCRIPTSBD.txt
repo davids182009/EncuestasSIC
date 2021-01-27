@@ -1,0 +1,182 @@
+--CREACION BASE DATOS
+create database testdb;
+create user test with encrypted password 'test';
+grant all privileges on database testdb to test;
+
+--CREACION TABLAS
+CREATE TABLE public.usuario (
+	nombre_usuario varchar(100) NULL,
+	contrasena varchar(100) NULL,
+	id serial NOT NULL,
+	login_fallido int2 NULL
+);
+ALTER TABLE public.usuario ADD CONSTRAINT usuario_pk PRIMARY KEY (id);
+
+CREATE TABLE public.encuesta (
+	id serial NOT NULL,
+	n_documento varchar NULL,
+	email varchar NULL,
+	comentarios varchar NULL,
+	id_marca_pc int4 NULL,
+	fecha_respuesta date NULL DEFAULT now(),
+	CONSTRAINT encuesta_pk PRIMARY KEY (id)
+);
+
+CREATE TABLE public.marca_pc (
+	id serial NOT NULL,
+	nombre varchar NULL,
+	CONSTRAINT marca_pc_pk PRIMARY KEY (id)
+);
+
+
+CREATE TABLE public.usuario_encuesta (
+	id_usuario int4 NOT NULL,
+	id_encuesta int4 NOT NULL,
+	CONSTRAINT usuario_encuesta_pk PRIMARY KEY (id_usuario,id_encuesta),
+	CONSTRAINT usuario_encuesta_fk FOREIGN KEY (id_usuario) REFERENCES public.usuario(id) ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT usuario_encuesta_fk_1 FOREIGN KEY (id_encuesta) REFERENCES public.encuesta(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+--OTORGAR PRIVILEGIOS
+GRANT ALL PRIVILEGES ON TABLE marca_pc TO test;
+GRANT ALL PRIVILEGES ON TABLE encuesta TO test;
+GRANT ALL PRIVILEGES ON TABLE usuario TO test;
+GRANT ALL PRIVILEGES ON TABLE usuario_encuesta TO test;
+
+GRANT USAGE, SELECT ON SEQUENCE encuesta_id_seq TO test;
+
+--FUNCIONES
+--Funcion que retorna las marcas de pc almacenadas
+CREATE OR REPLACE FUNCTION consulta_marcas_pc(OUT resultado text)
+RETURNS text AS $$
+
+BEGIN
+    
+	SELECT json_agg(json_build_object('id', mp.id,
+		'marca', mp.nombre))
+		from marca_pc mp
+		into resultado;
+END;
+$$ LANGUAGE plpgsql;
+
+--Funcion que permite insertar la informacion de la encuesta
+CREATE OR REPLACE FUNCTION insertar_informacion(IN objetoJson text, OUT resultado text)
+RETURNS text AS $$
+
+	DECLARE
+		json_recibido json;
+		id_resultado text;
+		
+		
+	BEGIN
+		SELECT cast(objetoJson AS json)
+		INTO json_recibido;
+		
+		INSERT INTO encuesta(n_documento, email, comentarios, id_marca_pc)
+		VALUES ((json_recibido->>'numeroDoc')::text, (json_recibido->>'email')::text, 
+				(json_recibido->>'comentario')::text, (json_recibido->>'marcaPc')::integer)
+		RETURNING id INTO id_resultado;
+		
+		resultado := json_build_object('resultado','OK', 'id', id_resultado);
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion que permite saber si un usuario que intenta ingresar al sistema coincide con los datos almacenados
+CREATE OR REPLACE FUNCTION consultar_usuario(IN usuario text, IN pass text, OUT resultado text)
+RETURNS text AS $$
+
+	
+	BEGIN
+		 SELECT json_build_object('nombre_usuario', u.nombre_usuario, 'id_usuario', u.id) FROM usuario u
+			WHERE u.nombre_usuario = usuario AND u.contrasena = pass
+		INTO resultado;
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion encargada de validar si un usuario existe
+CREATE OR REPLACE FUNCTION usuario_existe(IN usuario text, OUT resultado text)
+RETURNS text AS $$
+
+	
+	BEGIN
+		 SELECT json_build_object('nombre_usuario', u.nombre_usuario, 'id_usuario', u.id) FROM usuario u
+			WHERE u.nombre_usuario = usuario
+		INTO resultado;
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion encargada de llevar el conteo de intentos fallidos de login
+CREATE OR REPLACE FUNCTION login_fallido(IN nombre text, OUT resultado text)
+RETURNS text AS $$
+
+	DECLARE
+		conteo_fallido integer:=0;
+		conteo_fallido2 integer:=0;
+	
+	BEGIN
+		
+		select u.login_fallido from usuario u where u.nombre_usuario = nombre
+		into conteo_fallido;
+
+		 UPDATE usuario SET login_fallido = conteo_fallido +1
+			where nombre_usuario = nombre;
+
+		select u.login_fallido from usuario u where u.nombre_usuario = nombre
+		into conteo_fallido2;
+		resultado := json_build_object('resultado','OK', 'login_fallido', conteo_fallido2);
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion que retorna las encuestas asociadas a un usuario particular
+CREATE OR REPLACE FUNCTION consultar_encuestas(IN idUsuario integer, OUT resultado text)
+RETURNS text AS $$
+
+	
+	BEGIN
+		 select json_agg(json_build_object('id_encuesta', e.id, 
+				'n_documento', e.n_documento, 'email', e.email,
+				'comentario', e.comentarios, 'marca_pc', mp.nombre,
+				'fecha', e.fecha_respuesta))
+			from usuario_encuesta ue
+			left join encuesta e on ue.id_encuesta = e.id
+			left join marca_pc mp on e.id_marca_pc = mp.id
+			where ue.id_usuario = idUsuario
+		INTO resultado;
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion encargada de asociar las encuestas diligenciadas al usuario autenticado
+CREATE OR REPLACE FUNCTION asociar_usuario_encuesta(IN idUsuario integer, in idEncuesta integer, OUT resultado text)
+RETURNS text AS $$
+
+	DECLARE
+		id_resultado text;
+		
+	BEGIN
+		
+		INSERT INTO usuario_encuesta(id_usuario, id_encuesta)
+		VALUES (idUsuario, idEncuesta);
+		
+		resultado := json_build_object('resultado','OK');
+				
+	END;
+$$ LANGUAGE plpgsql;
+
+--Funcion que permite la eliminacion de encuestas diligenciadas
+CREATE OR REPLACE FUNCTION eliminar_encuesta(IN idEncuesta integer, OUT resultado text)
+RETURNS text AS $$
+		
+	BEGIN
+		
+		DELETE FROM usuario_encuesta WHERE id_encuesta = idEncuesta;
+		DELETE FROM encuesta WHERE id = idEncuesta;
+		
+		resultado := json_build_object('resultado','OK');
+				
+	END;
+$$ LANGUAGE plpgsql;
